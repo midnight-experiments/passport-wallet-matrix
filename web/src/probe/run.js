@@ -81,7 +81,7 @@ export async function runDetectedTest(d, ctx, { version = null } = {}) {
 export const PROMPTS = Object.freeze({
   evm: [
     'Connect (eth_requestAccounts).',
-    'Sign a Passport approval as EIP-712 V1 typed data, twice: a rotate_enc_key approval for a random account that does not exist.',
+    'Sign a Passport approval as EIP-712 V1 typed data, twice: a rotate_enc_key approval for a random account that does not exist, setting the all-zero value (no key) as its new key.',
     'Sign the privacy-key request with personal_sign, twice, for the probe network "wallet-matrix-probe", where no account lives.',
   ],
   solana: [

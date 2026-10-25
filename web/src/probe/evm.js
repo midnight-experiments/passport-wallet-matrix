@@ -1,8 +1,9 @@
 // "Test my wallet" for the EVM arm (evm_k256), with the client's own rules:
 //   - an approval is EIP-712 V1 typed data (the fixed domain without
 //     chainId) signed with eth_signTypedData_v4; the probe is a
-//     rotate_enc_key approval for a random account that does not exist, so
-//     it authorises nothing anywhere;
+//     rotate_enc_key approval for a random account that does not exist, with
+//     the all-zero value as its new key (no key at all), so it authorises
+//     nothing anywhere and carries nothing that looks like a key;
 //   - the privacy-key request is signed with personal_sign; the probe signs
 //     it for the probe network, whose privacy key belongs to no account;
 //   - each is signed twice, and both signatures must be the same;
@@ -23,7 +24,7 @@ import {
 import { step, ask, applyCheck } from './common.js';
 
 /** The two probe requests for an address. */
-export function evmProbeRequests(address, probeAccount = randomBytes(32), probeKey = randomBytes(32)) {
+export function evmProbeRequests(address, probeAccount = randomBytes(32), probeKey = new Uint8Array(32)) {
   const typedData = evmK256Messages.rotateEncKey({ account: probeAccount, device: address, authNonce: 0n }, probeKey);
   checkEip712V1TypedData(typedData);
   const blind = blindMessageBytes({ scheme: 'evm_k256', network: PROBE_NETWORK, identity: address, accountIndex: PROBE_ACCOUNT_INDEX });

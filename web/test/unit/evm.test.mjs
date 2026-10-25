@@ -20,6 +20,8 @@ test('the probe asks for the fixed V1 domain without chainId, and for the blind 
   assert.deepEqual(Object.keys(r.typed.typedData.domain).sort(), ['name', 'verifyingContract', 'version']);
   assert.equal(r.typed.typedData.domain.verifyingContract, EIP712_V1_VERIFYING_CONTRACT);
   assert.equal(r.typed.typedData.primaryType, 'RotateEncKey');
+  assert.equal(r.typed.typedData.message.newKey, '0x' + '00'.repeat(32), 'the probe sets no key');
+  assert.notEqual(evmProbeRequests(addr).typed.typedData.message.account, r.typed.typedData.message.account, 'a fresh probe account each time');
   const text = new TextDecoder().decode(Buffer.from(r.personal.messageHex, 'hex'));
   assert.match(text, /^Midnight Passport account privacy key \(v1\)\nNetwork: wallet-matrix-probe\nWallet: Ethereum address 0x1111111111111111111111111111111111111111\nAccount index: 0\n/);
 });
