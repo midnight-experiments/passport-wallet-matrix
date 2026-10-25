@@ -12,3 +12,5 @@ coverage/
 *.prover
 *.verifier
 *.bzkir
+# The pinned compiler, installed by scripts/fetch-compactc.sh.
+.tools/

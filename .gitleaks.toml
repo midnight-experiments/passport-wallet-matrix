@@ -2,3 +2,18 @@ title = "passport-wallet-matrix"
 
 [extend]
 useDefault = true
+
+# Each allowlist below names one exact line that the default `generic-api-key` rule mistakes for a
+# key. The whole line must match; `\s*` admits the line breaks gitleaks may include around it.
+# They name no path: gitleaks skips every file an allowlist's `paths` match, even with
+# `condition = "AND"`, so a path would hide the rest of that file from every rule.
+
+[[allowlists]]
+description = "The key-set id: the public SHA-256 of the key-set manifest, not a credential"
+regexTarget = "line"
+regexes = ['''^\s*"keySetId": "[0-9a-f]{64}",\s*$''']
+
+[[allowlists]]
+description = "Vendored Passport client: a function alias whose name contains `Key`"
+regexTarget = "line"
+regexes = ['''^\s*export const solanaKeyFromPoint = ed25519KeyFromPoint;\s*$''']
