@@ -22,12 +22,11 @@ export const MIN_VERSIONS = Object.freeze({
 });
 
 /** Trezor Connect asks every web page for a manifest naming the application
- *  and a contact address. The contact address is set before the page is
- *  deployed; Connect accepts the empty string. */
+ *  and a contact address, which Trezor uses to reach the page's maintainer. */
 export const TREZOR_MANIFEST = Object.freeze({
   appName: 'Passport wallet matrix',
   appUrl: 'https://passport-wallet-matrix.pages.dev',
-  email: '',
+  email: 'edward.alvarado@midnight.foundation',
 });
 
 /** The BIP-44 paths the direct hardware paths use: the first account of each chain. */

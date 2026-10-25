@@ -60,6 +60,6 @@ The bundler finds every section folder at build time (`esbuild-config.mjs`, `vir
 
 The EVM and Solana checks use the client's own modules: the formats each arm accepts, the probe texts, the canonical signatures and the signer check. Those modules import the compiled account contract (`./contract.js`) and two curve helpers of `@midnight-ntwrk/compact-runtime`. The page verifies signatures but never proves, so the bundler maps `./contract.js` to `src/vendor-shims/contract.js`, whose bindings throw when used, and the two helpers to a copy of their behaviour. A page section that needs the contract itself (account operations) changes that alias in `esbuild-config.mjs`.
 
-## Before deployment
+## Trezor Connect manifest
 
-Trezor Connect asks every page for a manifest with a contact address (`TREZOR_MANIFEST` in `src/config.js`); it is empty until the address is chosen.
+Trezor Connect asks every page for a manifest: the application's name, its URL and a contact address Trezor uses to reach the maintainer (`TREZOR_MANIFEST` in `src/config.js`).
