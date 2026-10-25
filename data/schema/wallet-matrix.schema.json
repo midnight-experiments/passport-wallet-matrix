@@ -1,0 +1,215 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/midnight-experiments/passport-wallet-matrix/blob/main/data/schema/wallet-matrix.schema.json",
+  "title": "Passport wallet matrix: curated baseline",
+  "description": "One row per wallet product, connection path and family; one cell per capability; every cell with a value, a reason and evidence. Rules that span several objects (references, legacy marking, key-material scan) are checked by data/scripts/validate.mjs.",
+  "type": "object",
+  "required": ["$schema", "version", "updated", "description", "families", "capabilities", "values", "states", "products", "rows", "evidence"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string", "minLength": 1 },
+    "version": { "type": "integer", "minimum": 1 },
+    "updated": { "$ref": "#/$defs/date" },
+    "description": { "$ref": "#/$defs/text" },
+    "families": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "$ref": "#/$defs/family" } },
+    "capabilities": { "type": "array", "minItems": 5, "maxItems": 5, "items": { "$ref": "#/$defs/capability" } },
+    "values": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "$ref": "#/$defs/valueDefinition" } },
+    "states": { "type": "array", "minItems": 5, "maxItems": 5, "items": { "$ref": "#/$defs/stateDefinition" } },
+    "products": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/product" } },
+    "rows": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/row" } },
+    "evidence": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/evidence" } }
+  },
+  "$defs": {
+    "id": {
+      "description": "Lower-case words joined by single hyphens; a row id joins product, family and path with double hyphens.",
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*(?:--[a-z0-9]+(?:-[a-z0-9]+)*)*$"
+    },
+    "text": { "type": "string", "minLength": 1, "pattern": "\\S" },
+    "date": { "type": "string", "pattern": "^20[0-9]{2}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$" },
+    "url": { "type": "string", "pattern": "^https://[^\\s]+$" },
+    "familyId": { "enum": ["evm", "solana", "near", "cardano"] },
+    "capabilityId": { "enum": ["connects", "signs-format", "readable", "deterministic", "on-chain"] },
+    "value": {
+      "description": "check: shown to hold; warning: holds with a stated caveat; cross: shown not to hold; not-yet-measured: nothing decides it yet.",
+      "enum": ["check", "warning", "cross", "not-yet-measured"]
+    },
+    "state": {
+      "description": "tested: this workspace's wallet sessions or emulator runs; documented: a primary source confirms it; unconfirmed: no primary source found; limited: a source or test shows a restriction; legacy: sunset, superseded, ceasing or phased out.",
+      "enum": ["tested", "documented", "unconfirmed", "limited", "legacy"]
+    },
+    "kind": { "enum": ["extension", "mobile", "web", "desktop", "telegram", "hardware"] },
+    "family": {
+      "type": "object",
+      "required": ["id", "label", "arm", "armStatus", "discovery", "format"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/familyId" },
+        "label": { "$ref": "#/$defs/text" },
+        "arm": { "type": "string", "pattern": "^[a-z]{3}_[a-z0-9]+$" },
+        "armStatus": { "enum": ["built", "planned"] },
+        "discovery": { "$ref": "#/$defs/text" },
+        "format": { "$ref": "#/$defs/text" },
+        "testOnly": { "description": "A label shown wherever the arm appears, while it is test only.", "$ref": "#/$defs/text" }
+      }
+    },
+    "capability": {
+      "type": "object",
+      "required": ["id", "label", "description"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/capabilityId" },
+        "label": { "$ref": "#/$defs/text" },
+        "description": { "$ref": "#/$defs/text" }
+      }
+    },
+    "valueDefinition": {
+      "type": "object",
+      "required": ["id", "label", "description"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/value" },
+        "label": { "$ref": "#/$defs/text" },
+        "description": { "$ref": "#/$defs/text" }
+      }
+    },
+    "stateDefinition": {
+      "type": "object",
+      "required": ["id", "description"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/state" },
+        "description": { "$ref": "#/$defs/text" }
+      }
+    },
+    "popularity": {
+      "description": "Read from the source on the given date. One product's count backs all of its rows and must not be added up across families.",
+      "type": "object",
+      "required": ["value", "unit", "text", "source", "read"],
+      "additionalProperties": false,
+      "properties": {
+        "value": { "type": ["integer", "null"], "minimum": 0 },
+        "unit": { "enum": ["chrome-users", "downloads", "android-downloads", null] },
+        "text": { "$ref": "#/$defs/text" },
+        "source": { "$ref": "#/$defs/url" },
+        "read": { "$ref": "#/$defs/date" },
+        "note": { "$ref": "#/$defs/text" }
+      }
+    },
+    "lifecycle": {
+      "type": "object",
+      "required": ["status"],
+      "additionalProperties": false,
+      "properties": {
+        "status": { "enum": ["active", "sunsetting", "superseded", "ceasing", "merged", "phased-out"] },
+        "note": { "$ref": "#/$defs/text" },
+        "evidence": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/id" } }
+      }
+    },
+    "product": {
+      "type": "object",
+      "required": ["id", "name", "type", "kinds", "families", "popularity", "lifecycle"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "$ref": "#/$defs/text" },
+        "type": { "enum": ["software", "hardware"] },
+        "kinds": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/kind" } },
+        "families": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/familyId" } },
+        "models": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/text" } },
+        "popularity": { "$ref": "#/$defs/popularity" },
+        "lifecycle": { "$ref": "#/$defs/lifecycle" },
+        "notes": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/text" } }
+      }
+    },
+    "path": {
+      "description": "direct: the page reaches the product itself. via: a hardware device reached through the named software-wallet row (its id).",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["type"],
+          "additionalProperties": false,
+          "properties": { "type": { "const": "direct" } }
+        },
+        {
+          "type": "object",
+          "required": ["type", "host"],
+          "additionalProperties": false,
+          "properties": { "type": { "const": "via" }, "host": { "$ref": "#/$defs/id" } }
+        }
+      ]
+    },
+    "cell": {
+      "type": "object",
+      "required": ["value", "reason", "evidence"],
+      "additionalProperties": false,
+      "properties": {
+        "value": { "$ref": "#/$defs/value" },
+        "reason": { "$ref": "#/$defs/text" },
+        "evidence": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/id" } }
+      }
+    },
+    "row": {
+      "description": "One wallet product, connection path and family. Cell values differ per family, so a product that signs for several families has one row per family.",
+      "type": "object",
+      "required": ["id", "product", "family", "path", "kind", "state", "group", "cells"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "product": { "$ref": "#/$defs/id" },
+        "family": { "$ref": "#/$defs/familyId" },
+        "path": { "$ref": "#/$defs/path" },
+        "kind": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/kind" } },
+        "state": { "$ref": "#/$defs/state" },
+        "group": { "description": "tested: backed by this workspace's tests; researched: from desk research and sources.", "enum": ["tested", "researched"] },
+        "notes": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/text" } },
+        "cells": {
+          "type": "object",
+          "required": ["connects", "signs-format", "readable", "deterministic", "on-chain"],
+          "additionalProperties": false,
+          "properties": {
+            "connects": { "$ref": "#/$defs/cell" },
+            "signs-format": { "$ref": "#/$defs/cell" },
+            "readable": { "$ref": "#/$defs/cell" },
+            "deterministic": { "$ref": "#/$defs/cell" },
+            "on-chain": { "$ref": "#/$defs/cell" }
+          }
+        }
+      }
+    },
+    "surface": {
+      "description": "What was tested. Never a key, an address or a signature.",
+      "type": "object",
+      "required": ["product"],
+      "additionalProperties": false,
+      "properties": {
+        "product": { "$ref": "#/$defs/text" },
+        "version": { "$ref": "#/$defs/text" },
+        "model": { "$ref": "#/$defs/text" },
+        "app": { "$ref": "#/$defs/text" },
+        "firmware": { "$ref": "#/$defs/text" },
+        "emulator": { "$ref": "#/$defs/text" },
+        "browser": { "$ref": "#/$defs/text" },
+        "access": { "$ref": "#/$defs/text" },
+        "network": { "$ref": "#/$defs/text" },
+        "account": { "$ref": "#/$defs/text" }
+      }
+    },
+    "evidence": {
+      "description": "workspace-test: a run in this workspace with a real wallet or the arm (described, never quoted); emulator-vector: an emulator run with public test seeds; primary-source: a source re-read in this workspace; research: a desk-research finding with the primary source it read.",
+      "type": "object",
+      "required": ["id", "kind", "title", "date", "description"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "kind": { "enum": ["workspace-test", "emulator-vector", "primary-source", "research"] },
+        "title": { "$ref": "#/$defs/text" },
+        "date": { "$ref": "#/$defs/date" },
+        "description": { "$ref": "#/$defs/text" },
+        "url": { "$ref": "#/$defs/url" },
+        "path": { "type": "string", "pattern": "^(?!/)(?!.*\\.\\./)[A-Za-z0-9._/-]+$" },
+        "surface": { "$ref": "#/$defs/surface" }
+      }
+    }
+  }
+}
