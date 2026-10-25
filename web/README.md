@@ -17,7 +17,12 @@ node test/mutants/run.mjs      # mutants of the verdict, detection and check rul
 
 `build.mjs` refuses to finish when a file is 25 MiB or larger (Pages' limit), when the site has 20,000 files or more, when the output holds server code (`_worker.js`, `functions/`, `_routes.json`) or names the build directory. `dist/build-manifest.json` lists every file with its size and SHA-256.
 
-The emulator tests (`test/emulator/`) drive the direct hardware paths against Ledger's Speculos and `trezor-user-env`; they need those emulators running and are described in each file's header.
+The emulator tests (`test/emulator/`) drive the page's direct hardware code against the emulators, with public test seeds only:
+
+- `ledger.mjs eth|sol <out>`: Speculos (`ghcr.io/ledgerhq/speculos:v0.27.1`, `--model flex`) running the Ethereum app 1.22.5 or the Solana app 1.16.0, built from Ledger's deployment tags (`flex_1.7.0_1.22.5_sdk_v27.1.1` of LedgerHQ/app-ethereum, `flex_1.6.1_1.16.0_sdk_v26.4.0` of LedgerHQ/app-solana) with Ledger's app builder. `SPECULOS` names its REST API.
+- `trezor.mjs <out>`: inside the network namespace of a `ghcr.io/trezor/trezor-user-env` container (its controller on 127.0.0.1:9001, the emulator's UDP port 21324), started with `uv run --no-sync python src/main.py` so that it needs no network.
+
+Bundle them first with `node test/build-tests.mjs`, then run `node .test-build/emulator/<file>.mjs`.
 
 ## Layout
 
