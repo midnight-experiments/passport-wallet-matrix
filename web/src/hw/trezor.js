@@ -7,8 +7,8 @@
 //     typed data, with the two hashes for a Model One), and personal_sign
 //     through ethereumSignMessage;
 //   - Solana: solanaSignMessage, which builds the off-chain message v1 from
-//     the text and the signing key; the signed bytes it reports must be the
-//     client's envelope.
+//     the text (passed as text, not hex) and the signing key; the signed
+//     bytes it reports must be the client's envelope.
 
 import { HW_PATHS } from '../config.js';
 import { fromHex, toHex } from '../bytes.js';
@@ -76,8 +76,10 @@ export async function trezorSolanaSource({ TC, path = HW_PATHS.solana }) {
       kind: 'hardware',
       family: 'trezor',
       publicKey,
+      // Connect takes the message as text, which the device signs as UTF-8
+      // after the off-chain v1 head it builds; the client's texts are ASCII.
       signOffchain: async (_envelope, text) => {
-        const r = unwrap(await TC.solanaSignMessage({ path: `m/${path}`, message: toHex(text) }));
+        const r = unwrap(await TC.solanaSignMessage({ path: `m/${path}`, message: new TextDecoder('utf-8', { fatal: true }).decode(text) }));
         return { signature: fromHex(r.signature), ...(r.signedData ? { signed: fromHex(r.signedData) } : {}) };
       },
     },

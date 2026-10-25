@@ -115,8 +115,9 @@ function fakeTrezor({ firmware = [2, 12, 5], fail = null } = {}) {
     ethereumSignMessage: async ({ message, hex }) => { assert.equal(hex, true); const s = signDigest(personalMessageDigest(fromHex(message))); return ok({ address: '', signature: s.r + s.s + s.v.toString(16) }); },
     solanaGetPublicKey: async () => ok({ publicKey: toHex(ed25519.getPublicKey(solSeed)) }),
     solanaSignMessage: async ({ message }) => {
+      // As the device does: the text, as UTF-8, after the v1 head.
       const pk = ed25519.getPublicKey(solSeed);
-      const env = concat(Uint8Array.of(0xff), utf8('solana offchain'), Uint8Array.of(1, 1), pk, fromHex(message));
+      const env = concat(Uint8Array.of(0xff), utf8('solana offchain'), Uint8Array.of(1, 1), pk, utf8(message));
       return ok({ signature: toHex(ed25519.sign(env, solSeed)), signedData: toHex(env) });
     },
   };

@@ -113,6 +113,23 @@ async function newPage(cfg) {
   await page.waitForSelector('#pane-detect .detected-list h3');
   const none = await page.textContent('#pane-detect');
   check('no wallet: the detection lists none in each family', (none.match(/None detected\./g) ?? []).length === 4);
+  // Every lazily loaded chunk (wallet selector modules, Ledger and Trezor
+  // libraries) evaluates in the browser.
+  const manifest = JSON.parse(fs.readFileSync(path.join(DIST, 'build-manifest.json'), 'utf8'));
+  const chunks = manifest.list.map((f) => f.path).filter((p) => p.startsWith('assets/chunks/'));
+  const failedChunks = await page.evaluate(async (list) => {
+    const bad = [];
+    for (const c of list) { try { await import(`/${c}`); } catch (e) { bad.push(`${c}: ${e?.message ?? e}`); } }
+    return bad;
+  }, chunks);
+  check(`every lazy chunk evaluates in Chromium (${chunks.length})`, failedChunks.length === 0, failedChunks.join(' | '));
+  // The hardware section: a Ledger request in a browser with no device
+  // ends in a readable error, not a broken page.
+  await page.click('a#tab-hardware');
+  await page.click('button.hw-btn[data-vendor="ledger"][data-family="evm"]');
+  await page.waitForSelector('#pane-hardware .hw-out .error', { timeout: 30000 });
+  const hwErr = await page.textContent('#pane-hardware .hw-out .error');
+  check('hardware: a Ledger request with no device ends in a readable error', /The device test stopped:/.test(hwErr), hwErr);
   check('no wallet: no page error', errors.length === 0, errors.join(' | '));
   await context.close();
 }
