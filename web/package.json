@@ -1,0 +1,42 @@
+{
+  "name": "passport-wallet-matrix-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "The wallet matrix page: the curated wallet table, wallet detection, \"test my wallet\" and the direct hardware paths. A static site with no server code.",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node test/run-unit.mjs",
+    "test:browser": "node test/browser/run.mjs",
+    "test:mutants": "node test/mutants/run.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@ledgerhq/hw-app-eth": "7.10.0",
+    "@ledgerhq/hw-app-solana": "7.12.0",
+    "@ledgerhq/hw-transport": "6.36.0",
+    "@ledgerhq/hw-transport-webhid": "6.36.0",
+    "@near-wallet-selector/core": "10.1.4",
+    "@near-wallet-selector/here-wallet": "10.1.4",
+    "@near-wallet-selector/hot-wallet": "10.1.4",
+    "@near-wallet-selector/intear-wallet": "10.1.4",
+    "@near-wallet-selector/meteor-wallet": "10.1.4",
+    "@near-wallet-selector/my-near-wallet": "10.1.4",
+    "@near-wallet-selector/near-mobile-wallet": "10.1.4",
+    "@near-wallet-selector/nightly": "10.1.4",
+    "@near-wallet-selector/okx-wallet": "10.1.4",
+    "@near-wallet-selector/sender": "10.1.4",
+    "@noble/curves": "2.2.0",
+    "@noble/hashes": "2.2.0",
+    "@trezor/connect-web": "10.0.1",
+    "buffer": "6.0.3"
+  },
+  "devDependencies": {
+    "@trezor/connect": "10.0.1",
+    "esbuild": "0.28.2",
+    "playwright-core": "1.63.0"
+  }
+}
