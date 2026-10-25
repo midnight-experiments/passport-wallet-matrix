@@ -172,18 +172,19 @@ export function cborEncode(v) {
 
 // ── CIP-8 / COSE ────────────────────────────────────────────────────────────
 
-/** The protected-header layouts the Cardano arm accepts, as exact bytes:
- *  layout 1 {1: -8, "address": addr} (Eternl, Trezor, Ledger), layout 2
- *  {1: -8, 4: addr, "address": addr} (Lace). */
+/** CIP-8 protected-header layouts as exact bytes: layout 1
+ *  {1: -8, "address": addr} (Eternl, Trezor, Ledger), layout 2
+ *  {1: -8, 4: addr, "address": addr} (Lace). Which ones an arm accepts is
+ *  the caller's choice. */
 export const CIP8_LAYOUTS = Object.freeze({
   1: (addr) => cborEncode(new CborMap([[1, -8], ['address', addr]])),
   2: (addr) => cborEncode(new CborMap([[1, -8], [4, addr], ['address', addr]])),
 });
 
-/** Which accepted layout the protected header is, for the given address,
- *  or null. */
-export function cip8Layout(protectedBytes, addr) {
-  for (const [n, build] of Object.entries(CIP8_LAYOUTS)) if (equalBytes(protectedBytes, build(addr))) return Number(n);
+/** Which of the `accepted` layouts the protected header is, byte for byte,
+ *  for the given address, or null. */
+export function cip8Layout(protectedBytes, addr, accepted) {
+  for (const n of accepted) if (CIP8_LAYOUTS[n] && equalBytes(protectedBytes, CIP8_LAYOUTS[n](addr))) return n;
   return null;
 }
 

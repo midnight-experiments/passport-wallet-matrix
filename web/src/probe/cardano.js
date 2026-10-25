@@ -13,7 +13,7 @@
 import { PROBE_NETWORK, PROBE_ACCOUNT_INDEX } from '../config.js';
 import { fromHex, toHex, randomBytes, equalBytes } from '../bytes.js';
 import { parseCoseSign1, parseCoseKey, cip8SigStructure, cip8Layout, isRewardAddress, verifyEd25519Strict } from './envelopes.js';
-import { cardanoProbeText, cardanoApprovalPayload, cardanoBlindPayload, PROVISIONAL_NOTE } from './provisional.js';
+import { cardanoProbeText, cardanoApprovalPayload, cardanoBlindPayload, CARDANO_ACCEPTED_LAYOUTS, PROVISIONAL_NOTE } from './provisional.js';
 import { step, ask, applyCheck } from './common.js';
 
 /** Verifies one signData answer. */
@@ -27,7 +27,7 @@ export function verifyCardanoAnswer(request, answer, identityKeyHex) {
   if (cose.hashedValue !== undefined && cose.hashedValue !== false) return { outcome: 'wrong-signature', reason: 'the unprotected "hashed" value is not a boolean' };
   if (!equalBytes(cose.payload, payload)) return { outcome: 'wrong-signature', reason: 'the wallet signed another payload than the one asked' };
   if (!isRewardAddress(addr)) return { outcome: 'wrong-signature', reason: 'the request was not made through a reward address' };
-  const layout = cip8Layout(cose.protectedBytes, addr);
+  const layout = cip8Layout(cose.protectedBytes, addr, CARDANO_ACCEPTED_LAYOUTS);
   if (layout === null) return { outcome: 'wrong-signature', reason: 'the protected header is not an accepted layout for the reward address (another address, or another header)' };
   if (identityKeyHex && toHex(key) !== identityKeyHex) return { outcome: 'wrong-signature', reason: `signed with another key (${toHex(key)}) than the one that signed first`, signer: toHex(key) };
   if (!verifyEd25519Strict(cose.signature, cip8SigStructure(cose.protectedBytes, cose.payload), key)) return { outcome: 'wrong-signature', reason: 'the signature does not verify over the Sig_structure' };

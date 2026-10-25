@@ -55,6 +55,9 @@ const PROBE_LAST = 'It authorises nothing: it only tests which signing format th
 
 // ── NEAR (NEP-413) ──────────────────────────────────────────────────────────
 
+/** NEP-413's callbackUrl, which every NEAR payload leaves absent. */
+export const NEAR_CALLBACK_URL = null;
+
 /** The recipient of a blind request. */
 export const NEAR_BLIND_RECIPIENT = 'midnight-passport';
 /** The tag of the blind-request nonce (32 bytes). */
@@ -78,7 +81,7 @@ export const nearWalletText = (pk) => `NEAR public key ${nearPublicKeyText(pk)}`
 
 /** The NEP-413 payload of the blind request for a key. */
 export function nearBlindPayload(pk, network, accountIndex) {
-  return { message: blindRequestLine(nearWalletText(pk), network, accountIndex), recipient: NEAR_BLIND_RECIPIENT, nonce: nearBlindNonce(accountIndex), callbackUrl: null };
+  return { message: blindRequestLine(nearWalletText(pk), network, accountIndex), recipient: NEAR_BLIND_RECIPIENT, nonce: nearBlindNonce(accountIndex), callbackUrl: NEAR_CALLBACK_URL };
 }
 
 /** The approval-form probe: a one-line text that authorises nothing, signed
@@ -91,10 +94,15 @@ export function nearProbePayload(probeAccount, probeNonce) {
     `Nonce: ${toHex(probeNonce)}`,
     PROBE_LAST,
   ]);
-  return { message, recipient: nearApprovalRecipient(probeAccount), nonce: nearDeviceNonce(probeAccount, 0n), callbackUrl: null };
+  return { message, recipient: nearApprovalRecipient(probeAccount), nonce: nearDeviceNonce(probeAccount, 0n), callbackUrl: NEAR_CALLBACK_URL };
 }
 
 // ── Cardano (CIP-8) ─────────────────────────────────────────────────────────
+
+/** The protected-header layouts the Cardano arm accepts (envelopes.js
+ *  builds them): 1 for Eternl, Trezor and Ledger, 2 for Lace. Every answer
+ *  must also be unhashed and made through the 29-byte reward address. */
+export const CARDANO_ACCEPTED_LAYOUTS = Object.freeze([1, 2]);
 
 /** X: the fixed 32-byte prefix of every layout-1 approval payload. The
  *  wording is not final; it reads as the start of the one-line text. */

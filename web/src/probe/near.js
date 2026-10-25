@@ -11,10 +11,10 @@
 import { PROBE_NETWORK, PROBE_ACCOUNT_INDEX } from '../config.js';
 import { fromHex, toHex, randomBytes, equalBytes } from '../bytes.js';
 import { nep413Digest, parseNearPublicKey, parseNearSignature, verifyEd25519Strict, nearPublicKeyText } from './envelopes.js';
-import { nearProbePayload, nearBlindPayload, PROVISIONAL_NOTE } from './provisional.js';
+import { nearProbePayload, nearBlindPayload, NEAR_CALLBACK_URL, PROVISIONAL_NOTE } from './provisional.js';
 import { step, ask, applyCheck } from './common.js';
 
-const payloadOf = (r) => ({ message: r.message, recipient: r.recipient, nonce: fromHex(r.nonceHex), callbackUrl: null });
+const payloadOf = (r) => ({ message: r.message, recipient: r.recipient, nonce: fromHex(r.nonceHex), callbackUrl: NEAR_CALLBACK_URL });
 
 /** Verifies one NEP-413 answer. `pageUrl` is the callbackUrl a wallet might
  *  have added; a signature over it is explained, and refused. */
@@ -44,7 +44,7 @@ export function verifyNearSteps(steps, identity, pageUrl = null) {
   return steps;
 }
 
-const requestOf = (p) => ({ type: 'nep413', message: p.message, recipient: p.recipient, nonceHex: toHex(p.nonce), callbackUrl: null });
+const requestOf = (p) => ({ type: 'nep413', message: p.message, recipient: p.recipient, nonceHex: toHex(p.nonce), callbackUrl: NEAR_CALLBACK_URL });
 
 /**
  * Runs the NEAR test on an adapter:

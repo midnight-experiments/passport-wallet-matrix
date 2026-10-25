@@ -48,6 +48,8 @@ export const MUTANTS = [
   ['C01-hashed-accepted', 'src/probe/cardano.js', "if (cose.hashed) return { outcome: 'wrong-signature'", "if (false) return { outcome: 'wrong-signature'"],
   ['C02-any-header', 'src/probe/cardano.js', "if (layout === null) return { outcome: 'wrong-signature'", "if (false) return { outcome: 'wrong-signature'"],
   ['C03-any-key', 'src/probe/cardano.js', 'if (identityKeyHex && toHex(key) !== identityKeyHex) return', 'if (false) return'],
+  ['P01-lace-layout-dropped', 'src/probe/provisional.js', 'export const CARDANO_ACCEPTED_LAYOUTS = Object.freeze([1, 2]);', 'export const CARDANO_ACCEPTED_LAYOUTS = Object.freeze([1]);'],
+  ['P02-callback-url-set', 'src/probe/provisional.js', 'export const NEAR_CALLBACK_URL = null;', "export const NEAR_CALLBACK_URL = 'https://passport-wallet-matrix.pages.dev/';"],
   // The result file's self-check (src/probe/result.js).
   ['R01-steps-not-rechecked', 'src/probe/result.js', "if (!sameJson(strip(steps), strip(r.steps))) throw", 'if (false) throw'],
   ['R02-verdict-not-rechecked', 'src/probe/result.js', "if (!sameJson(cells, r.cells)) throw", 'if (false) throw'],
