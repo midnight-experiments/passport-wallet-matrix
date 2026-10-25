@@ -1,0 +1,14 @@
+node_modules/
+dist/
+build/
+coverage/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+# Compiled contract output and proving keys are published as release assets, never committed.
+**/contracts/managed/
+*.prover
+*.verifier
+*.bzkir
